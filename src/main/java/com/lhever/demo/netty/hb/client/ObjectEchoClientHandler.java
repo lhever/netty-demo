@@ -50,7 +50,7 @@ public class ObjectEchoClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         // Echo back the received object to the server.
-        System.out.println("client received " + JsonUtils.obj2Byte(msg));
+        System.out.println("client received " + JsonUtils.obj2Json(msg));
         ctx.write(msg);
     }
 

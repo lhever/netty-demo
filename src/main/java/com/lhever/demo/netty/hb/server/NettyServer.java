@@ -21,6 +21,15 @@ public class NettyServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(NettyServer.class);
 
+    private Integer serverPort;
+    private String serverIp;
+
+    public NettyServer(String serverIp, Integer serverPort) {
+        this.serverPort = serverPort;
+        this.serverIp = serverIp;
+    }
+
+
     public void bind() throws Exception {
         // 配置服务端的NIO线程组
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -43,13 +52,13 @@ public class NettyServer {
                 });
 
         // 绑定端口，同步等待成功
-        b.bind(NettyConstants.SERVER_IP, NettyConstants.SERVER_PORT).sync();
+        b.bind(serverIp, serverPort).sync();
 
-        LOG.info("Netty server start ok : " + (NettyConstants.SERVER_IP + " : " + NettyConstants.SERVER_PORT));
+        LOG.info("Netty server start ok : " + (serverIp + " : " + serverPort));
     }
 
     public static void main(String[] args) throws Exception {
-        new NettyServer().bind();
+        new NettyServer(NettyConstants.SERVER_IP, NettyConstants.SERVER_PORT).bind();
     }
 }
 

@@ -15,7 +15,6 @@
  */
 package com.lhever.demo.netty.hb.codec;
 
-import com.alibaba.fastjson.TypeReference;
 import com.lhever.demo.netty.hb.consts.NettyConstants;
 import com.lhever.demo.netty.hb.register.CommonMsg;
 import com.lhever.demo.netty.hb.register.DtoRegister;
@@ -26,6 +25,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
 /**
@@ -66,12 +66,12 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
                 CommonMsg o = JsonUtils.json2Obj(text, CommonMsg.class);
                 return o;
             } else {
-                Class<?> cls = DtoRegister.getCls(code);
-                TypeReference<CommonMsg<?>> reference = new TypeReference<CommonMsg<?>>(cls) {
-                };
-
-                CommonMsg<?> commonMsg = JsonUtils.json2Obj(text, reference);
-                return commonMsg;
+                Class cls = DtoRegister.getCls(code);
+                if (cls == null) {
+                    System.out.println("cannot find class for code " + code);
+                }
+                CommonMsg o = JsonUtils.json2Obj(text, new Type[]{cls}, CommonMsg.class);
+                return o;
             }
 
         }
