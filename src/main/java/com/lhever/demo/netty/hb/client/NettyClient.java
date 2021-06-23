@@ -15,9 +15,9 @@
  */
 package com.lhever.demo.netty.hb.client;
 
-import com.lhever.demo.netty.hb.NettyConstant;
 import com.lhever.demo.netty.hb.codec.NettyMessageDecoder;
 import com.lhever.demo.netty.hb.codec.NettyMessageEncoder;
+import com.lhever.demo.netty.hb.consts.NettyConstants;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -68,7 +68,7 @@ public class NettyClient {
                     });
             // 发起异步连接操作
             ChannelFuture future = b.connect(new InetSocketAddress(host, port),
-                    new InetSocketAddress(NettyConstant.CLIENT_IP, NettyConstant.CLIENT_PORT)).sync();
+                    new InetSocketAddress(NettyConstants.CLIENT_IP, NettyConstants.CLIENT_PORT)).sync();
             // 当对应的channel关闭的时候，就会返回对应的channel。
             // Returns the ChannelFuture which will be notified when this channel is closed. This method always returns the same future instance.
             future.channel().closeFuture().sync();
@@ -80,7 +80,7 @@ public class NettyClient {
                     try {
                         TimeUnit.SECONDS.sleep(1);
                         try {
-                            connect(NettyConstant.SERVER_PORT, NettyConstant.SERVER_IP);// 发起重连操作
+                            connect(NettyConstants.SERVER_PORT, NettyConstants.SERVER_IP);// 发起重连操作
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -97,7 +97,7 @@ public class NettyClient {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        new NettyClient().connect(NettyConstant.SERVER_PORT, NettyConstant.SERVER_IP);
+        new NettyClient().connect(NettyConstants.SERVER_PORT, NettyConstants.SERVER_IP);
     }
 
 }

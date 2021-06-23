@@ -1,8 +1,8 @@
 package com.lhever.demo.netty.hb.server;
 
-import com.lhever.demo.netty.hb.NettyConstant;
 import com.lhever.demo.netty.hb.codec.NettyMessageDecoder;
 import com.lhever.demo.netty.hb.codec.NettyMessageEncoder;
+import com.lhever.demo.netty.hb.consts.NettyConstants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -43,9 +43,9 @@ public class NettyServer {
                 });
 
         // 绑定端口，同步等待成功
-        b.bind(NettyConstant.SERVER_IP, NettyConstant.SERVER_PORT).sync();
+        b.bind(NettyConstants.SERVER_IP, NettyConstants.SERVER_PORT).sync();
 
-        LOG.info("Netty server start ok : " + (NettyConstant.SERVER_IP + " : " + NettyConstant.SERVER_PORT));
+        LOG.info("Netty server start ok : " + (NettyConstants.SERVER_IP + " : " + NettyConstants.SERVER_PORT));
     }
 
     public static void main(String[] args) throws Exception {

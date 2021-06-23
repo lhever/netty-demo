@@ -1,5 +1,7 @@
 package com.lhever.demo.netty.hb.register;
 
+import com.lhever.demo.netty.hb.consts.NettyConstants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,10 +12,34 @@ public class DtoRegister {
 
 
     static {
-        register(1, User.class);
+        innerRegister(NettyConstants.PING_PONG, PingPong.class);
+        innerRegister(NettyConstants.NULL, null);
+
+        register(1, Auth.class);
+        register(2, User.class);
     }
 
     public static void register(Integer code, Class<?> cls) {
+        if (code == null) {
+            throw new IllegalArgumentException("code cannot be null");
+        }
+        if (code == NettyConstants.NULL || code == NettyConstants.PING_PONG) {
+            throw new IllegalArgumentException("code illegal");
+        }
+        if (codeVsClass.containsKey(code) || classVsCode.containsKey(cls)) {
+            throw new IllegalArgumentException("conflict");
+        }
+        codeVsClass.put(code, cls);
+        classVsCode.put(cls, code);
+    }
+
+    private static void innerRegister(Integer code, Class<?> cls) {
+        if (code == null) {
+            throw new IllegalArgumentException("code cannot be null");
+        }
+        if (codeVsClass.containsKey(code) || classVsCode.containsKey(cls)) {
+            throw new IllegalArgumentException("conflict");
+        }
         codeVsClass.put(code, cls);
         classVsCode.put(cls, code);
     }

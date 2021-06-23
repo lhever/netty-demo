@@ -15,14 +15,18 @@
  */
 package com.lhever.demo.netty.hb.codec;
 
+import com.alibaba.fastjson.TypeReference;
+import com.lhever.demo.netty.hb.consts.NettyConstants;
+import com.lhever.demo.netty.hb.register.CommonMsg;
 import com.lhever.demo.netty.hb.register.DtoRegister;
+import com.lhever.demo.netty.hb.register.PingPong;
 import com.lhever.demo.netty.hb.utils.JsonUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * @author Lilinfeng
@@ -46,24 +50,32 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
         int code = frame.readInt();
         System.out.println("code is " + code);
 
-        Class<?> cls = DtoRegister.getCls(code);
+        if (code == NettyConstants.PING_PONG) {
+            return PingPong.INSTANCE;
+        } else {
 
-        int i = frame.readableBytes();
-        byte[] b = new byte[i];
-        frame.readBytes(b);
+            int i = frame.readableBytes();
+            byte[] b = new byte[i];
+            frame.readBytes(b);
+            String text = new String(b, Charset.forName("UTF-8"));
+
 
 //        ByteBufInputStream bis = new ByteBufInputStream(in, true);
-        ByteArrayInputStream bis = new ByteArrayInputStream(b);
+//            ByteArrayInputStream bis = new ByteArrayInputStream(b);
+            if (code == NettyConstants.NULL) {
+                CommonMsg o = JsonUtils.json2Obj(text, CommonMsg.class);
+                return o;
+            } else {
+                Class<?> cls = DtoRegister.getCls(code);
+                TypeReference<CommonMsg<?>> reference = new TypeReference<CommonMsg<?>>(cls) {
+                };
 
-        Object o = null;
-        try {
-            o = JsonUtils.json2Obj(bis, cls);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            bis.close();
+                CommonMsg<?> commonMsg = JsonUtils.json2Obj(text, reference);
+                return commonMsg;
+            }
+
         }
-
-        return o;
     }
+
+
 }

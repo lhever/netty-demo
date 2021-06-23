@@ -1,6 +1,7 @@
 package com.lhever.demo.netty.hb.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.io.IOException;
@@ -45,5 +46,10 @@ public class JsonUtils {
             e.printStackTrace();
         }
         return t;
+    }
+
+
+    public static <T> T json2Obj(String text, TypeReference<T> type) {
+        return  JSON.parseObject(text, type);
     }
 }

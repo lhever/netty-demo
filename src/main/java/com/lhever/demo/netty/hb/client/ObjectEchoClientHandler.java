@@ -15,7 +15,9 @@
  */
 package com.lhever.demo.netty.hb.client;
 
+import com.lhever.demo.netty.hb.register.CommonMsg;
 import com.lhever.demo.netty.hb.register.User;
+import com.lhever.demo.netty.hb.utils.JsonUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -29,13 +31,13 @@ import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
  */
 public class ObjectEchoClientHandler extends ChannelInboundHandlerAdapter {
 
-    private final User firstMessage;
+    private final CommonMsg<User> firstMessage;
 
     /**
      * Creates a client-side handler.
      */
     public ObjectEchoClientHandler() {
-        firstMessage =new User(18, "lihong-");
+        firstMessage =CommonMsg.forInstance(new User(18, "lihong-"));
     }
 
     @Override
@@ -48,6 +50,7 @@ public class ObjectEchoClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         // Echo back the received object to the server.
+        System.out.println("client received " + JsonUtils.obj2Byte(msg));
         ctx.write(msg);
     }
 
