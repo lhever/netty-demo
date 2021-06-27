@@ -51,6 +51,13 @@ public class ClientAuthHandler extends ChannelInboundHandlerAdapter {
         ctx.fireChannelActive();
     }
 
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("客户端被断开");
+        super.channelInactive(ctx);
+    }
+
     private CommonMsg<AuthReq> buildAuthReq() {
         AuthReq req = new AuthReq("lhever", "123456");
         CommonMsg<AuthReq> msg = CommonMsg.forInstance(req);
@@ -75,7 +82,7 @@ public class ClientAuthHandler extends ChannelInboundHandlerAdapter {
 
             } else {
 
-                System.out.println("client auth error");
+                System.out.println("client auth error" + JsonUtils.obj2Json(msg));
                 ctx.close();
             }
 

@@ -38,13 +38,17 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         } else  {
             System.out.println("server received  auth req:  " + JsonUtils.obj2Json(authReq));
             AuthResp resp = new AuthResp();
+            System.out.println("服务端发送认证相应");
             if ("lhever".equals(authReq.getUser()) && "123456".equals(authReq.getPwd())) {
                 resp.setSuccess(true);
                 resp.setClientId("lhever");
+                ctx.write(CommonMsg.forInstance(resp));
             } else {
                 resp.setSuccess(false);
+                ctx.writeAndFlush(CommonMsg.forInstance(resp));
+                System.out.println("认证不通过，关闭客户端");
+                ctx.close();
             }
-            ctx.write(CommonMsg.forInstance(resp));
 //            ctx.fireChannelUnregistered();
 //            System.out.println("un register lhever");
         }

@@ -110,6 +110,7 @@ public class NettyClient {
                     try {
                         TimeUnit.SECONDS.sleep(1);
                         try {
+                            System.out.println("客户端发起重连操作");
                             connect();// 发起重连操作
                         } catch (Exception e) {
                             e.printStackTrace();
