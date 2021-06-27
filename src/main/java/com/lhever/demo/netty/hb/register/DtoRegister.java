@@ -15,8 +15,9 @@ public class DtoRegister {
         innerRegister(NettyConstants.PING_PONG, PingPong.class);
         innerRegister(NettyConstants.NULL, null);
 
-        register(1, Auth.class);
-        register(2, User.class);
+        register(1, AuthReq.class);
+        register(2, AuthResp.class);
+        register(3, User.class);
     }
 
     public static void register(Integer code, Class<?> cls) {

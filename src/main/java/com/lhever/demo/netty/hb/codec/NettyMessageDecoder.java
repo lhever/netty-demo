@@ -48,7 +48,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
         }
 
         int code = frame.readInt();
-        System.out.println("code is " + code);
+//        System.out.println("code is " + code);
 
         if (code == NettyConstants.PING_PONG) {
             return PingPong.INSTANCE;

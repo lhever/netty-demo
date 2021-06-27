@@ -46,6 +46,7 @@ public class NettyServer {
 
 //                        ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 
+                        ch.pipeline().addLast(new ServerAuthHandler());
                         ch.pipeline().addLast(new ObjectEchoServerHandler());
 
                     }

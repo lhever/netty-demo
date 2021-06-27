@@ -89,6 +89,8 @@ public class NettyClient {
 
                             ch.pipeline().addLast("MessageEncoder", new NettyMessageEncoder());
 
+                            ch.pipeline().addLast(new ClientAuthHandler());
+
 //                            ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 
                             ch.pipeline().addLast(new ObjectEchoClientHandler());

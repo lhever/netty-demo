@@ -15,14 +15,9 @@
  */
 package com.lhever.demo.netty.hb.client;
 
-import com.lhever.demo.netty.hb.register.CommonMsg;
-import com.lhever.demo.netty.hb.register.User;
 import com.lhever.demo.netty.hb.utils.JsonUtils;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-
-import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
 /**
  * Handler implementation for the object echo client.  It initiates the
@@ -31,27 +26,28 @@ import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
  */
 public class ObjectEchoClientHandler extends ChannelInboundHandlerAdapter {
 
-    private final CommonMsg<User> firstMessage;
 
     /**
      * Creates a client-side handler.
      */
     public ObjectEchoClientHandler() {
-        firstMessage =CommonMsg.forInstance(new User(18, "lihong-"));
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+
+        System.out.println("ObjectEchoClientHandler channel active !!!!");
         // Send the first message if this handler is a client-side handler.
-        ChannelFuture future = ctx.writeAndFlush(firstMessage);
-        future.addListener(FIRE_EXCEPTION_ON_FAILURE); // Let object serialisation exceptions propagate.
+//        ChannelFuture future = ctx.writeAndFlush(firstMessage);
+//        future.addListener(FIRE_EXCEPTION_ON_FAILURE); // Let object serialisation exceptions propagate.
+        ctx.fireChannelActive();
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         // Echo back the received object to the server.
-        System.out.println("client received " + JsonUtils.obj2Json(msg));
-        ctx.write(msg);
+        System.out.println("client received: " + JsonUtils.obj2Json(msg));
+//        ctx.write(msg);
     }
 
     @Override

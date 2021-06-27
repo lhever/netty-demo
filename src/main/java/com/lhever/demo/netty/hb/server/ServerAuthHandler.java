@@ -15,6 +15,10 @@
  */
 package com.lhever.demo.netty.hb.server;
 
+import com.lhever.demo.netty.hb.register.AuthReq;
+import com.lhever.demo.netty.hb.register.AuthResp;
+import com.lhever.demo.netty.hb.register.CommonMsg;
+import com.lhever.demo.netty.hb.utils.CommonUtils;
 import com.lhever.demo.netty.hb.utils.JsonUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -23,24 +27,37 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * Handles both client-side and server-side handler depending on which
  * constructor was called.
  */
-public class ObjectEchoServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        // Echo back the received object to the client.
-        System.out.println("server received " + JsonUtils.obj2Json(msg));
-        ctx.write(msg);
+        AuthReq authReq = CommonUtils.getIfMatch(msg, AuthReq.class);
+        if (authReq == null) {
+            System.out.println("服务端收到的不是认证请求，透传消息");
+            ctx.fireChannelRead(msg);
+        } else  {
+            System.out.println("server received  auth req:  " + JsonUtils.obj2Json(authReq));
+            AuthResp resp = new AuthResp();
+            if ("lhever".equals(authReq.getUser()) && "123456".equals(authReq.getPwd())) {
+                resp.setSuccess(true);
+                resp.setClientId("lhever");
+            } else {
+                resp.setSuccess(false);
+            }
+            ctx.write(CommonMsg.forInstance(resp));
+//            ctx.fireChannelUnregistered();
+//            System.out.println("un register lhever");
+        }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
         ctx.fireChannelReadComplete();
+
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        ctx.close();
+        ctx.fireExceptionCaught(cause);
     }
 }

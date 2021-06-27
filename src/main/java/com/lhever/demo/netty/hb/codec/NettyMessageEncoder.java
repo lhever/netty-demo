@@ -24,6 +24,7 @@ public final class NettyMessageEncoder extends MessageToByteEncoder<Object> {
         } else if (msg instanceof CommonMsg) {
             encodeCommonMsg(sendBuf, (CommonMsg) msg);
         } else {
+            System.out.println("unknown msg: " + msg == null ? null : msg.getClass());
             //@TODO
 
         }
