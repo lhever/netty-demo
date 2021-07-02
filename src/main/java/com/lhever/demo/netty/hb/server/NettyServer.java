@@ -12,6 +12,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +45,12 @@ public class NettyServer {
                         ch.pipeline().addLast(new NettyMessageDecoder());
                         ch.pipeline().addLast(new NettyMessageEncoder());
 
+                        ch.pipeline().addLast("ReadTimeoutHandler",  new ReadTimeoutHandler(180));
+
 //                        ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 
                         ch.pipeline().addLast(new ServerAuthHandler());
+                        ch.pipeline().addLast(new ServerHeartBeatHandler());
                         ch.pipeline().addLast(new ObjectEchoServerHandler());
 
                     }

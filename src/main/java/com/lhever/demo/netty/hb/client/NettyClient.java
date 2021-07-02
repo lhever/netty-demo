@@ -26,6 +26,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,10 @@ public class NettyClient {
 
                             ch.pipeline().addLast("MessageEncoder", new NettyMessageEncoder());
 
+                            ch.pipeline().addLast("ReadTimeoutHandler",  new ReadTimeoutHandler(180));
+
                             ch.pipeline().addLast(new ClientAuthHandler());
+                            ch.pipeline().addLast(new ClientHeartBeatHandler());
 
 //                            ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 
@@ -108,7 +112,7 @@ public class NettyClient {
                 @Override
                 public void run() {
                     try {
-                        TimeUnit.SECONDS.sleep(1);
+                        TimeUnit.SECONDS.sleep(8);
                         try {
                             System.out.println("客户端发起重连操作");
                             connect();// 发起重连操作

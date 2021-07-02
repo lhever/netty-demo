@@ -15,6 +15,11 @@
  */
 package com.lhever.demo.netty.hb.server;
 
+import com.lhever.demo.netty.hb.register.AuthReq;
+import com.lhever.demo.netty.hb.register.AuthResp;
+import com.lhever.demo.netty.hb.register.CommonMsg;
+import com.lhever.demo.netty.hb.register.PingPong;
+import com.lhever.demo.netty.hb.utils.CommonUtils;
 import com.lhever.demo.netty.hb.utils.JsonUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -23,30 +28,30 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * Handles both client-side and server-side handler depending on which
  * constructor was called.
  */
-public class ObjectEchoServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerHeartBeatHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        // Echo back the received object to the client.
-        System.out.println("server received " + JsonUtils.obj2Json(msg));
-        ctx.write(msg);
+        if (msg == null ) {
+            ctx.fireChannelRead(msg);
+        } else if (msg instanceof PingPong) {
+            System.out.println("Receive client heart beat message : ---> " + msg);
+            System.out.println("echo client heart beat message : ---> " + msg);
+            ctx.writeAndFlush(PingPong.INSTANCE);
+        } else {
+            ctx.fireChannelRead(msg);
+
+        }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
         ctx.fireChannelReadComplete();
+
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-    }
-
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ctx.close();
-        super.channelInactive(ctx);
+        ctx.fireExceptionCaught(cause);
     }
 }

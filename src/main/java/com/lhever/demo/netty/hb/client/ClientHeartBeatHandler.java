@@ -15,15 +15,15 @@
  */
 package com.lhever.demo.netty.hb.client;
 
-import com.lhever.demo.netty.hb.register.AuthReq;
-import com.lhever.demo.netty.hb.register.AuthResp;
-import com.lhever.demo.netty.hb.register.CommonMsg;
-import com.lhever.demo.netty.hb.register.User;
+import com.lhever.demo.netty.hb.register.*;
 import com.lhever.demo.netty.hb.utils.CommonUtils;
 import com.lhever.demo.netty.hb.utils.JsonUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.concurrent.ScheduledFuture;
+
+import java.util.concurrent.TimeUnit;
 
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
@@ -32,22 +32,19 @@ import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
  * ping-pong traffic between the object echo client and server by sending the
  * first message to the server.
  */
-public class ClientAuthHandler extends ChannelInboundHandlerAdapter {
+public class ClientHeartBeatHandler extends ChannelInboundHandlerAdapter {
+
+    private volatile ScheduledFuture<?> scheduledFuture;
 
     /**
      * Creates a client-side handler.
      */
-    public ClientAuthHandler() {
+    public ClientHeartBeatHandler() {
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println("ClientAuthHandler channel active !!!!");
-
-        System.out.println("client send auth req");
-        // Send the first message if this handler is a client-side handler.
-        ChannelFuture future = ctx.writeAndFlush(buildAuthReq());
-        future.addListener(FIRE_EXCEPTION_ON_FAILURE); // Let object serialisation exceptions propagate.
+        System.out.println("ClientHeartBeatHandler channel active !!!!");
         ctx.fireChannelActive();
     }
 
@@ -58,50 +55,68 @@ public class ClientAuthHandler extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
     }
 
-    private CommonMsg<AuthReq> buildAuthReq() {
-        AuthReq req = new AuthReq("lhever", "123456");
-        CommonMsg<AuthReq> msg = CommonMsg.forInstance(req);
-        return msg;
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         // Echo back the received object to the server.
         AuthResp resp = CommonUtils.getIfMatch(msg, AuthResp.class);
         if (resp != null) {
-
             if (resp.getSuccess() != null && resp.getSuccess()) {
-
-                ctx.fireChannelRead(msg);
-
-                System.out.println("client auth success");
-//                ctx.fireChannelRead(msg);
-
-                CommonMsg<User> userMsg = CommonMsg.forInstance(new User(18, "lihong-"));
-
-                System.out.println("client send user msg");
-                ctx.writeAndFlush(userMsg);
-
+                scheduledFuture = ctx.executor().scheduleAtFixedRate(
+                        new HeartBeatTask(ctx), 0, 30000, TimeUnit.MILLISECONDS);
             } else {
-
-                System.out.println("client auth error" + JsonUtils.obj2Json(msg));
-                ctx.close();
+                System.out.println("客户端认证未通过，不定期心跳");
             }
 
-        } else {
-            System.out.println("客户端收到的不是认证响应，透传消息");
-            ctx.fireChannelRead(msg);
+        } else if(msg instanceof PingPong) {
+            System.out.println("Client receive server heart beat message : ---> " + msg);
 
+        }else {
+            ctx.fireChannelRead(msg);
         }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
         ctx.fireChannelReadComplete();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        cause.printStackTrace();
+
+        ScheduledFuture<?> scheduledFuture = this.scheduledFuture;
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+            this.scheduledFuture = null;
+        }
+
+
         ctx.fireExceptionCaught(cause);
+    }
+
+
+
+
+
+
+    private static class HeartBeatTask implements Runnable {
+        private final ChannelHandlerContext ctx;
+        public HeartBeatTask(final ChannelHandlerContext ctx) {
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void run() {
+            PingPong heatBeat = buildHeatBeat();
+            System.out.println("Client send heart beat messsage to server : ---> " + heatBeat);
+            ctx.writeAndFlush(heatBeat);
+        }
+
+        private PingPong buildHeatBeat() {
+            return PingPong.INSTANCE;
+        }
+
     }
 }
